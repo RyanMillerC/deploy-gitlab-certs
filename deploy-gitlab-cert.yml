@@ -1,0 +1,34 @@
+- name: Deploy a new TLS certificate to GitLab
+  hosts: gitlab
+  become: true
+  vars:
+    # Paths on the GitLab server
+    destination_cert_path: /etc/pki/tls/certs/taco.moe.crt
+    destination_key_path: /etc/pki/tls/private/taco.moe.key
+
+    # Paths on the Ansible controller
+    source_cert_path: ./gitlab.taco.moe/gitlab.taco.moe.crt
+    source_key_path: ./gitlab.taco.moe/gitlab.taco.moe.key
+
+  tasks:
+    - name: Copy certificate to server
+      ansible.builtin.copy:
+        src: "{{ source_cert_path }}"
+        dest: "{{ destination_cert_path }}"
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart GitLab
+
+    - name: Copy key to server
+      ansible.builtin.copy:
+        src: "{{ source_key_path }}"
+        dest: "{{ destination_key_path }}"
+        owner: root
+        group: gitlab-www
+        mode: '0640'
+      notify: Restart GitLab
+
+  handlers:
+    - name: Restart GitLab
+      ansible.builtin.command: gitlab-ctl restart

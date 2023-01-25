@@ -1,0 +1,5 @@
+# Ignore any files that could be certs/keys
+*.crt
+*.key
+*.ca
+*.tls
